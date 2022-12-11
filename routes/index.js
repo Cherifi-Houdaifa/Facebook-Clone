@@ -1,10 +1,20 @@
 const express = require("express");
 const router = express.Router();
 
+const usersRouter = require("./users/users");
+const postsRouter = require("./posts/posts");
 const passport = require("passport");
 
-router.get("/", passport.authenticate("jwt", {session: false}),function (req, res, next) {
-	res.json("hi");
-});
+router.use(
+    "/users",
+    passport.authenticate("jwt", { session: false }),
+    usersRouter
+);
+
+router.use(
+    "/posts",
+    passport.authenticate("jwt", { session: false }),
+    postsRouter
+);
 
 module.exports = router;

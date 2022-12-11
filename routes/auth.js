@@ -75,4 +75,5 @@ router.post("/local/signup", [
         res.json({ message: `You have successfully signed up as ${username}` });
     },
 ]);
+
 module.exports = router;
