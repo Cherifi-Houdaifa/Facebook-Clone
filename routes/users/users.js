@@ -6,7 +6,7 @@ const usersControllers = require("../../controllers/users");
 
 router.use("/friends", friendsRouter);
 
-// Search in users by username
+// Search in users by username (search query included)
 router.get("/search", usersControllers.searchUser);
 
 // get user by _id with (friends included)
