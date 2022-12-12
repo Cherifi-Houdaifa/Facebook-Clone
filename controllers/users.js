@@ -15,7 +15,7 @@ exports.getUser = async function (req, res) {
     try {
         const { userid } = req.params;
         if (!isValidObjectId(userid)) {
-            return res.json({ message: "Invalid ObjectId" });
+            return res.status(400).json({ message: "Invalid ObjectId" });
         }
         let user = await User.findById(userid)
             .populate("friends.friend")

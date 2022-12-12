@@ -3,6 +3,11 @@ const router = express.Router();
 
 const friendsControllers = require("../../controllers/friends");
 
+
+// get all friend requests sent to you
+router.get("/", friendsControllers.getFriendRequests);
+
+// All down need query parameter (friendid)
 // send a friend request to a user
 router.post("/request", friendsControllers.requestFriend);
 
