@@ -7,7 +7,7 @@ const postsControllers = require("../../controllers/posts");
 router.use("/:postid/comments/", commentsRouter);
 
 // get the 10 recent posts if no userid query parameter is inluded
-// if it is get user posts
+// if it is get the 10 recent user posts
 // (both with skip query parameter optimal)
 router.get("/", postsControllers.getPosts);
 
