@@ -1,9 +1,18 @@
 const express = require("express");
 const logger = require("morgan");
+const cors = require('cors');
+const compression = require('compression')
 const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
+
+// Security best practices
+app.disable('x-powered-by');
+app.use(cors());
+
+// Performance best practices
+app.use(compression())
 
 // DB connection
 require("./helpers/db");
