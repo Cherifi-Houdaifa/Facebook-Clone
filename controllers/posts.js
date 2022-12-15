@@ -2,6 +2,8 @@ const Post = require("../models/post");
 const Comment = require("../models/comment");
 const { isValidObjectId } = require("mongoose");
 const { body, validationResult } = require("express-validator");
+const mutler = require("multer");
+const upload = mutler();
 
 exports.getPosts = async function (req, res, next) {
     try {
@@ -32,6 +34,7 @@ exports.getPosts = async function (req, res, next) {
     }
 };
 exports.createPost = [
+	upload.single("image"),
     body("text").exists().isAscii(),
     async function (req, res, next) {
         try {
@@ -41,15 +44,34 @@ exports.createPost = [
             }
             const userid = req.user._id;
             const { text } = req.body;
+			const image = req.file;
+			const mimetypes = ["image/jpeg", "image/png", "image/gif"]
             if (!isValidObjectId(userid)) {
                 return res.status(400).json({ message: "Invalid ObjectId" });
             }
-            const post = await Post.create({
-                user: userid,
-                text: text,
-                date: Date.now(),
-            });
-            res.json({ post: post });
+			// no image included
+			if (!image) {
+				const post = await Post.create({
+					user: userid,
+					text: text,
+					date: Date.now(),
+				});
+				return res.json({ post: post });
+			}
+			// image included
+			if (!mimetypes.includes(image.mimetype)) {
+				return res.json({message: `Unsupported file extension: ${image.mimetype}`})
+			}
+			if (image.size > 5 * 1024 * 1024) {
+				return res.json({message: "File size too big"})
+			}
+			const post = await Post.create({
+				user: userid,
+				text: text,
+				img: image.buffer,
+				date: Date.now(),
+			});
+			return res.json({ post: post });
         } catch (err) {
             return next(err);
         }
