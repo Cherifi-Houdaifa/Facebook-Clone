@@ -3,7 +3,7 @@ const Comment = require("../models/comment");
 const { isValidObjectId } = require("mongoose");
 const { body, validationResult } = require("express-validator");
 
-exports.getPosts = async function (req, res) {
+exports.getPosts = async function (req, res, next) {
     try {
         const { userid, skip } = req.query;
         // userid included
@@ -28,12 +28,12 @@ exports.getPosts = async function (req, res) {
             return res.json(posts);
         }
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
 exports.createPost = [
     body("text").exists().isAscii(),
-    async function (req, res) {
+    async function (req, res, next) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -51,11 +51,11 @@ exports.createPost = [
             });
             res.json({ post: post });
         } catch (err) {
-            return res.status(500).json({ message: "An error occurred" });
+            return next(err);
         }
     },
 ];
-exports.toggleLike = async function (req, res) {
+exports.toggleLike = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { postid } = req.query;
@@ -74,10 +74,10 @@ exports.toggleLike = async function (req, res) {
         await post.save();
         return res.json({ message: "You have liked this post" });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.removePost = async function (req, res) {
+exports.removePost = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { postid } = req.query;
@@ -86,12 +86,9 @@ exports.removePost = async function (req, res) {
         }
         const post = await Post.findById(postid);
         if (!post.user.equals(userid)) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        "You can't delete this post because it's not yours",
-                });
+            return res.status(400).json({
+                message: "You can't delete this post because it's not yours",
+            });
         }
         await post.delete();
 
@@ -102,6 +99,6 @@ exports.removePost = async function (req, res) {
         );
         res.json({ message: `Deleted post with id ${post._id}` });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };

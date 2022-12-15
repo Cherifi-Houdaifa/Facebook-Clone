@@ -3,7 +3,7 @@ const Comment = require("../models/comment");
 const { isValidObjectId } = require("mongoose");
 const { body, validationResult } = require("express-validator");
 
-exports.getComments = async function (req, res) {
+exports.getComments = async function (req, res, next) {
     try {
         const { postid } = req.params;
         if (!isValidObjectId(postid)) {
@@ -17,33 +17,35 @@ exports.getComments = async function (req, res) {
         );
         return res.json({ comments: comments });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
 exports.createComment = [
     body("text").exists().isAscii(),
-    async function (req, res) {
+    async function (req, res, next) {
         try {
-			const errors = validationResult(req);
+            const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-			const userid = req.user._id;
-			const {text} = req.body;
+            const userid = req.user._id;
+            const { text } = req.body;
             const { postid } = req.params;
             if (!isValidObjectId(postid)) {
                 return res.status(400).json({ message: "Invalid ObjectId" });
             }
-			const post = await Post.findById(postid);
-			const comment = await Comment.create({
-				user: userid,
-				text: text,
-			})
-			post.comments.push(comment._id);
-			await post.save();
-			return res.json({message: `You have commented on the post with id of ${post._id}`});
+            const post = await Post.findById(postid);
+            const comment = await Comment.create({
+                user: userid,
+                text: text,
+            });
+            post.comments.push(comment._id);
+            await post.save();
+            return res.json({
+                message: `You have commented on the post with id of ${post._id}`,
+            });
         } catch (err) {
-            return res.status(500).json({ message: "An error occurred" });
+            return next(err);
         }
     },
 ];

@@ -2,16 +2,16 @@ const User = require("../models/user");
 const { isValidObjectId } = require("mongoose");
 const { body, validationResult } = require("express-validator");
 
-exports.searchUser = async function (req, res) {
+exports.searchUser = async function (req, res, next) {
     try {
         const { search } = req.query;
         const users = await User.find({ username: new RegExp(search, "i") });
         return res.json({ users: users });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.getUser = async function (req, res) {
+exports.getUser = async function (req, res, next) {
     try {
         const { userid } = req.params;
         if (!isValidObjectId(userid)) {
@@ -39,13 +39,13 @@ exports.getUser = async function (req, res) {
         });
         return res.json({ user: user });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
 exports.updateUser = [
     body("username").optional(),
     body("profilePic").optional().isURL(),
-    async function (req, res) {
+    async function (req, res, next) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -68,7 +68,7 @@ exports.updateUser = [
             });
             return res.json({ message: "Successfully updated user" });
         } catch (err) {
-            return res.status(500).json({ message: "An error occurred" });
+            return next(err);
         }
     },
 ];

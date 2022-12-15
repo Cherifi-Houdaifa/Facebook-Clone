@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const { isValidObjectId } = require("mongoose");
 
-exports.getFriendRequests = async function (req, res) {
+exports.getFriendRequests = async function (req, res, next) {
     try {
         const userid = req.user._id;
         if (!isValidObjectId(userid)) {
@@ -16,10 +16,10 @@ exports.getFriendRequests = async function (req, res) {
         });
         res.json({ friendRequests: friendRequests });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.requestFriend = async function (req, res) {
+exports.requestFriend = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { friendid } = req.query;
@@ -51,10 +51,10 @@ exports.requestFriend = async function (req, res) {
             message: `You have sent a friend request to ${friend.username}`,
         });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.acceptFriend = async function (req, res) {
+exports.acceptFriend = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { friendid } = req.query;
@@ -87,10 +87,10 @@ exports.acceptFriend = async function (req, res) {
             message: `You have accepted ${friend.username} as your friend`,
         });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.declineFriend = async function (req, res) {
+exports.declineFriend = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { friendid } = req.query;
@@ -123,10 +123,10 @@ exports.declineFriend = async function (req, res) {
             message: `You have declined ${friend.username}'s friend request`,
         });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };
-exports.removeFriend = async function (req, res) {
+exports.removeFriend = async function (req, res, next) {
     try {
         const userid = req.user._id;
         const { friendid } = req.query;
@@ -156,6 +156,6 @@ exports.removeFriend = async function (req, res) {
             message: `You have removed ${friend.username} from your friends`,
         });
     } catch (err) {
-        return res.status(500).json({ message: "An error occurred" });
+        return next(err);
     }
 };

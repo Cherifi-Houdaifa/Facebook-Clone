@@ -30,4 +30,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
 
+app.use(function (err, req, res, next) {
+	return res.status(500).json({ message: "An error occurred" });
+})
+
 module.exports = app;
