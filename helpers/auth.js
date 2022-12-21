@@ -2,7 +2,6 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const JWTStrategy = require("passport-jwt").Strategy;
 const LocalStrategy = require("passport-local").Strategy;
-const ExtractJwt = require("passport-jwt").ExtractJwt;
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
@@ -63,7 +62,13 @@ passport.use(
     "jwt",
     new JWTStrategy(
         {
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: (req) => {
+                let jwt = null;
+                if (req && req.cookies) {
+                    jwt = req.cookies["jwt"];
+                }
+                return jwt;
+            },
             secretOrKey: process.env.JWT_SECRET,
         },
         async function (payload, done) {

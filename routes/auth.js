@@ -23,11 +23,25 @@ router.get(
         const token = jwt.sign(body, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        return res.json({ token: token });
+        return res
+            .cookie("check", "1", {
+                sameSite: "None",
+                secure: true,
+                path: "/",
+                maxAge: 1000 * 3600 * 24,
+            })
+            .cookie("jwt", token, {
+                httpOnly: true,
+                sameSite: "None",
+                secure: true,
+                path: "/",
+                maxAge: 1000 * 3600 * 24,
+            })
+            .json({ message: "You have logged in successfully" });
     }
 );
 
-router.get(
+router.post(
     "/local",
     passport.authenticate("local", { session: false }),
     function (req, res, next) {
@@ -35,7 +49,21 @@ router.get(
         const token = jwt.sign(body, process.env.JWT_SECRET, {
             expiresIn: "1d",
         });
-        return res.json({ token: token });
+        return res
+            .cookie("check", "1", {
+                sameSite: "None",
+                secure: true,
+                path: "/",
+                maxAge: 1000 * 3600 * 24,
+            })
+            .cookie("jwt", token, {
+                httpOnly: true,
+                sameSite: "None",
+                secure: true,
+                path: "/",
+                maxAge: 1000 * 3600 * 24,
+            })
+            .json({ message: "You have logged in successfully" });
     }
 );
 
@@ -75,5 +103,16 @@ router.post("/local/signup", [
         res.json({ message: `You have successfully signed up as ${username}` });
     },
 ]);
+
+router.get("/logout", function (req, res, next) {
+    if (!req.cookies["jwt"]) {
+        return res
+            .status(401)
+            .json({ message: "You have not sent a jwt token" });
+    }
+    res.clearCookie("jwt").clearCookie("check").json({
+        message: "You have logged out successfully",
+    });
+});
 
 module.exports = router;
