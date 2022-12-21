@@ -37,7 +37,7 @@ router.get(
                 path: "/",
                 maxAge: 1000 * 3600 * 24,
             })
-            .json({ message: "You have logged in successfully" });
+            .send("<script>window.close();</script>");
     }
 );
 

@@ -6,6 +6,9 @@ const usersControllers = require("../../controllers/users");
 
 router.use("/friends", friendsRouter);
 
+// get current user
+router.get("/current", usersControllers.getCurrentUser);
+
 // Search in users by username (search query included)
 router.get("/search", usersControllers.searchUser);
 

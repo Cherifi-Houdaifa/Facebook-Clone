@@ -2,6 +2,36 @@ const User = require("../models/user");
 const { isValidObjectId } = require("mongoose");
 const { body, validationResult } = require("express-validator");
 
+exports.getCurrentUser = async function (req, res, next) {
+    try {
+        const userid = req.user._id;
+		let user = await User.findById(userid)
+            .populate("friends.friend")
+            .exec();
+        // filtering the friend requests
+        user.friends = user.friends.filter((friend) => {
+            if (friend.status !== "friends") {
+                return false;
+            }
+            return true;
+        });
+        user = user.toObject();
+        // removing passwords and googleids from objects
+        delete user.password;
+        delete user.googleid;
+        // removing passwords and googleids from friends objects and removing their friends
+        user.friends.forEach((object) => {
+            delete object.friend.password;
+            delete object.friend.googleid;
+            delete object.friend.friends;
+        });
+        return res.json({ user: user });
+    } catch (err) {
+		console.log(err);
+        return next(err);
+    }
+};
+
 exports.searchUser = async function (req, res, next) {
     try {
         const { search } = req.query;
