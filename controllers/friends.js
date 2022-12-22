@@ -59,7 +59,7 @@ exports.acceptFriend = async function (req, res, next) {
         const userid = req.user._id;
         const { friendid } = req.query;
         if (!isValidObjectId(userid) || !isValidObjectId(friendid)) {
-            return res.json({ message: "Invalid ObjectId" });
+            return res.status(400).json({ message: "Invalid ObjectId" });
         }
         if (userid === friendid) {
             return res.status(400).json({
@@ -95,7 +95,7 @@ exports.declineFriend = async function (req, res, next) {
         const userid = req.user._id;
         const { friendid } = req.query;
         if (!isValidObjectId(userid) || !isValidObjectId(friendid)) {
-            return res.json({ message: "Invalid ObjectId" });
+            return res.status(400).json({ message: "Invalid ObjectId" });
         }
         if (userid === friendid) {
             return res.status(400).json({
@@ -131,7 +131,7 @@ exports.removeFriend = async function (req, res, next) {
         const userid = req.user._id;
         const { friendid } = req.query;
         if (!isValidObjectId(userid) || !isValidObjectId(friendid)) {
-            return res.json({ message: "Invalid ObjectId" });
+            return res.status(400).json({ message: "Invalid ObjectId" });
         }
         if (userid === friendid) {
             return res.status(400).json({

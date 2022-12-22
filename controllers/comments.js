@@ -15,7 +15,8 @@ exports.getComments = async function (req, res, next) {
                 return Comment.findById(commentid);
             })
         );
-        return res.json({ comments: comments });
+		// return the post with its comments
+        return res.json({ post: post, comments: comments });
     } catch (err) {
         return next(err);
     }

@@ -9,36 +9,36 @@ exports.getPosts = async function (req, res, next) {
     try {
         const { userid, skip } = req.query;
         const findObject = {};
-		// userid included
+        // userid included
         if (userid) {
             if (!isValidObjectId(userid)) {
                 return res.status(400).json({ message: "Invalid ObjectId" });
             }
-			findObject.user = userid;
+            findObject.user = userid;
         }
-        
-		const posts = await Post.find(findObject)
-                .sort({ date: "desc" })
-                .skip(skip || 0)
-                .limit(10)
-                .exec();
-        
-		let newPosts = []
-		posts.forEach((post) => {
-			let newPost = post.toObject();
-			if (post.img) {
-				newPost.img = post.img.toString("base64");
-			}
-			newPosts.push(newPost);
-		})
-		return res.json(newPosts);
+
+        const posts = await Post.find(findObject)
+            .sort({ date: "desc" })
+            .skip(skip || 0)
+            .limit(10)
+            .exec();
+
+        let newPosts = [];
+        posts.forEach((post) => {
+            let newPost = post.toObject();
+            if (post.img) {
+                newPost.img = post.img.toString("base64");
+            }
+            newPosts.push(newPost);
+        });
+        return res.json(newPosts);
     } catch (err) {
         return next(err);
     }
 };
 exports.createPost = [
-	upload.single("image"),
-    body("text").exists().isAscii(),
+    upload.single("image"),
+    body("text").exists().isAscii().escape(),
     async function (req, res, next) {
         try {
             const errors = validationResult(req);
@@ -47,34 +47,40 @@ exports.createPost = [
             }
             const userid = req.user._id;
             const { text } = req.body;
-			const image = req.file;
-			const mimetypes = ["image/jpeg", "image/png", "image/gif"]
+            const image = req.file;
+            const mimetypes = ["image/jpeg", "image/png", "image/gif"];
             if (!isValidObjectId(userid)) {
                 return res.status(400).json({ message: "Invalid ObjectId" });
             }
-			// no image included
-			if (!image) {
-				const post = await Post.create({
-					user: userid,
-					text: text,
-					date: Date.now(),
-				});
-				return res.json({ post: post });
-			}
-			// image included
-			if (!mimetypes.includes(image.mimetype)) {
-				return res.json({message: `Unsupported file extension: ${image.mimetype}`})
-			}
-			if (image.size > 5 * 1024 * 1024) {
-				return res.json({message: "File size too big"})
-			}
-			const post = await Post.create({
-				user: userid,
-				text: text,
-				img: image.buffer,
-				date: Date.now(),
-			});
-			return res.json({ post: post });
+            // no image included
+            if (!image) {
+                const post = await Post.create({
+                    user: userid,
+                    text: text,
+                    date: Date.now(),
+                });
+                return res.json({
+                    message: "You have successeffly created the post",
+                });
+            }
+            // image included
+            if (!mimetypes.includes(image.mimetype)) {
+                return res.json({
+                    message: `Unsupported file extension: ${image.mimetype}`,
+                });
+            }
+            if (image.size > 5 * 1024 * 1024) {
+                return res.json({ message: "File size too big" });
+            }
+            const post = await Post.create({
+                user: userid,
+                text: text,
+                img: image.buffer,
+                date: Date.now(),
+            });
+            return res.json({
+                message: "You have successeffly created the post",
+            });
         } catch (err) {
             return next(err);
         }
