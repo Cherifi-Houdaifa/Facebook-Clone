@@ -8,27 +8,30 @@ const upload = mutler();
 exports.getPosts = async function (req, res, next) {
     try {
         const { userid, skip } = req.query;
-        // userid included
+        const findObject = {};
+		// userid included
         if (userid) {
             if (!isValidObjectId(userid)) {
                 return res.status(400).json({ message: "Invalid ObjectId" });
             }
-            const posts = await Post.find({ user: userid })
+			findObject.user = userid;
+        }
+        
+		const posts = await Post.find(findObject)
                 .sort({ date: "desc" })
                 .skip(skip || 0)
                 .limit(10)
                 .exec();
-            return res.json(posts);
-        }
-        // userid not included
-        else {
-            const posts = await Post.find({})
-                .sort({ date: "desc" })
-                .skip(skip || 0)
-                .limit(10)
-                .exec();
-            return res.json(posts);
-        }
+        
+		let newPosts = []
+		posts.forEach((post) => {
+			let newPost = post.toObject();
+			if (post.img) {
+				newPost.img = post.img.toString("base64");
+			}
+			newPosts.push(newPost);
+		})
+		return res.json(newPosts);
     } catch (err) {
         return next(err);
     }
