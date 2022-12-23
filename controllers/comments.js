@@ -9,14 +9,19 @@ exports.getComments = async function (req, res, next) {
         if (!isValidObjectId(postid)) {
             return res.status(400).json({ message: "Invalid ObjectId" });
         }
-        const post = await Post.findById(postid);
+        const post = await Post.findById(postid).populate("user").exec();
         const comments = await Promise.all(
             post.comments.map((commentid) => {
                 return Comment.findById(commentid);
             })
         );
-		// return the post with its comments
-        return res.json({ post: post, comments: comments });
+        let newPost = post.toObject();
+        if (post.img) {
+            newPost.img = post.img.toString("base64");
+        }
+        newPost.comments = comments;
+        // return the post with its comments
+        return res.json(newPost);
     } catch (err) {
         return next(err);
     }

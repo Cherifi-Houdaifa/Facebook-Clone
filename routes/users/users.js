@@ -16,6 +16,6 @@ router.get("/search", usersControllers.searchUser);
 router.get("/:userid", usersControllers.getUser);
 
 // update user profile (username or profile picture only) (you need to be logged in as the user)
-router.put("/:userid", usersControllers.updateUser);
+router.put("/", usersControllers.updateUser);
 
 module.exports = router;

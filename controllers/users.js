@@ -5,7 +5,7 @@ const { body, validationResult } = require("express-validator");
 exports.getCurrentUser = async function (req, res, next) {
     try {
         const userid = req.user._id;
-		let user = await User.findById(userid)
+        let user = await User.findById(userid)
             .populate("friends.friend")
             .exec();
         // filtering the friend requests
@@ -27,7 +27,7 @@ exports.getCurrentUser = async function (req, res, next) {
         });
         return res.json({ user: user });
     } catch (err) {
-		console.log(err);
+        console.log(err);
         return next(err);
     }
 };
@@ -73,7 +73,16 @@ exports.getUser = async function (req, res, next) {
     }
 };
 exports.updateUser = [
-    body("username").optional(),
+    body("username")
+        .optional()
+        .escape()
+        .custom(async (username) => {
+            const user = await User.findOne({ username: username });
+            if (user) {
+                throw new Error("Username already exsits");
+            }
+            return true;
+        }),
     body("profilePic").optional().isURL(),
     async function (req, res, next) {
         try {
@@ -81,16 +90,7 @@ exports.updateUser = [
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-            const { userid } = req.params;
-            if (req.user._id !== userid) {
-                return res.status(400).json({
-                    message:
-                        "You need to be logged in as the user to update his profile",
-                });
-            }
-            if (!isValidObjectId(userid)) {
-                return res.status(400).json({ message: "Invalid ObjectId" });
-            }
+            const userid = req.user._id;
             const { username, profilePic } = req.body;
             const user = await User.findByIdAndUpdate(userid, {
                 username: username,
